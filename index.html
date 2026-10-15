@@ -261,7 +261,12 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const docName = urlParams.get('doc');
+    const requestedDoc = urlParams.get('doc');
+    const docName = requestedDoc === 'welcome' ? 'hermes-tools-skills-guide' : requestedDoc;
+    if (requestedDoc === 'welcome') {
+      urlParams.set('doc', docName);
+      history.replaceState(null, '', '?' + urlParams.toString());
+    }
 
     if (docName) {
       // عرض القارئ
