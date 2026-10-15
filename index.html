@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مكتبة المستندات | علي جبريل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --code-bg: #090d16;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cairo', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+      width: 100%;
+      flex: 1;
+    }
+    /* Cards view */
+    .catalog-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .catalog-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .catalog-header p { color: var(--text-muted); }
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .doc-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .doc-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    .doc-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .doc-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      flex: 1;
+    }
+    .doc-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: background-color 0.2s, opacity 0.2s;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #0f172a;
+    }
+    .btn-primary:hover { background-color: var(--accent-hover); }
+    .btn-secondary {
+      background-color: #334155;
+      color: var(--text-main);
+    }
+    .btn-secondary:hover { background-color: #475569; }
+    /* Reader view */
+    #reader-view { display: none; }
+    .reader-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .markdown-body {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+    }
+    @media (max-width: 640px) {
+      .markdown-body { padding: 1.25rem; }
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      color: #fff;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 0.3rem;
+    }
+    .markdown-body p, .markdown-body ul, .markdown-body ol {
+      margin-bottom: 1.25rem;
+    }
+    .markdown-body ul, .markdown-body ol {
+      padding-right: 1.5rem;
+    }
+    .markdown-body blockquote {
+      border-right: 4px solid var(--accent);
+      padding: 0.75rem 1.25rem;
+      background: rgba(56, 189, 248, 0.05);
+      border-radius: 4px;
+      margin-bottom: 1.25rem;
+      color: #cbd5e1;
+    }
+    .markdown-body pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+      margin-bottom: 1.25rem;
+      font-family: 'Fira Code', monospace;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .markdown-body code {
+      font-family: 'Fira Code', monospace;
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+    .markdown-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+    .markdown-body th, .markdown-body td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: right;
+    }
+    .markdown-body th {
+      background: rgba(255,255,255,0.03);
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="?" class="logo">
+      <span>📚 مكتبة المستندات</span>
+    </a>
+    <div>
+      <a href="https://github.com/abodahmaj/md-library" target="_blank" class="btn btn-secondary">GitHub</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- قائمة المستندات -->
+    <div id="catalog-view">
+      <div class="catalog-header">
+        <h1>المستندات المنشورة</h1>
+        <p>مكتبة للقراءة المباشرة ومشاركة ملفات المارك داون بسهولة</p>
+      </div>
+      <div class="doc-grid" id="docs-list">
+        <!-- سيتم توليد البطاقات عبر JS -->
+      </div>
+    </div>
+
+    <!-- صفحة قارئ المستند -->
+    <div id="reader-view">
+      <div class="reader-toolbar">
+        <a href="?" class="btn btn-secondary">← العودة للمكتبة</a>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" id="copy-link-btn">📋 نسخ الرابط</button>
+          <a class="btn btn-secondary" id="raw-doc-btn" target="_blank">ملف المارك داون</a>
+        </div>
+      </div>
+      <article class="markdown-body" id="markdown-content">
+        <p style="text-align: center; color: var(--text-muted);">جاري تحميل المستند...</p>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    معلم المادة: علي جبريل - مجمع الثقافة التعليمي | مكتبة Markdown
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const docName = urlParams.get('doc');
+
+    if (docName) {
+      // عرض القارئ
+      document.getElementById('catalog-view').style.display = 'none';
+      document.getElementById('reader-view').style.display = 'block';
+      
+      const docPath = `docs/${docName}.md`;
+      document.getElementById('raw-doc-btn').href = docPath;
+
+      document.getElementById('copy-link-btn').addEventListener('click', () => {
+        navigator.clipboard.writeText(window.location.href);
+        const btn = document.getElementById('copy-link-btn');
+        const orig = btn.innerText;
+        btn.innerText = '✓ تم النسخ!';
+        setTimeout(() => btn.innerText = orig, 2000);
+      });
+
+      fetch(docPath)
+        .then(res => {
+          if (!res.ok) throw new Error('تعذر العثور على الملف');
+          return res.text();
+        })
+        .then(text => {
+          const cleanHtml = DOMPurify.sanitize(marked.parse(text));
+          document.getElementById('markdown-content').innerHTML = cleanHtml;
+          // تحديث عنوان الصفحة
+          const firstH1 = document.querySelector('#markdown-content h1');
+          if (firstH1) document.title = firstH1.innerText + ' | مكتبة المستندات';
+        })
+        .catch(err => {
+          document.getElementById('markdown-content').innerHTML = `
+            <div style="text-align: center; color: #ef4444; padding: 2rem;">
+              <h3>خطأ في تحميل المستند</h3>
+              <p>${err.message}</p>
+            </div>`;
+        });
+    } else {
+      // عرض الفهرس
+      fetch('docs.json')
+        .then(res => res.json())
+        .then(docs => {
+          const container = document.getElementById('docs-list');
+          if (!docs || docs.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">لا توجد مستندات بعد.</p>';
+            return;
+          }
+          container.innerHTML = docs.map(doc => `
+            <div class="doc-card">
+              <div>
+                <h3>${doc.title}</h3>
+                <p>${doc.description || 'مستند تعليمي / تقرير'}</p>
+              </div>
+              <div>
+                <div class="doc-meta">📅 ${doc.date || 'حديثاً'}</div>
+                <div class="card-actions">
+                  <a href="?doc=${doc.id}" class="btn btn-primary" style="flex: 1;">قراءة المستند</a>
+                  <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '?doc=${doc.id}'); alert('تم نسخ الرابط');">نسخ</button>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        })
+        .catch(() => {
+          document.getElementById('docs-list').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">مرحباً بك! سيتم سرد المستندات هنا بمجرد إضافتها.</p>';
+        });
+    }
+  </script>
+</body>
+</html>
